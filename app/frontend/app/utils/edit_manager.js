@@ -35,6 +35,8 @@ var editManager = Ember.Object.extend({
     this.swapId = null;
     this.stashedButtonToApply = null;
     this.clear_history();
+    console.log("Title!!!!! " + this.controller.get('model.name'));
+    this.fetch_suggestions(this.controller.get('model.name'), this.controller.get('ordered_buttons'));
   },
   set_drag_mode: function(enable) {
     if(app_state.controller) {
@@ -50,6 +52,9 @@ var editManager = Ember.Object.extend({
   }.observes('app_state.edit_mode'),
   start_edit_mode: function() {
     var app = app_state.controller;
+    alert('starting edit mode!!!!');
+    console.log('title: ' + app_state.get('name'));
+    console.log('buttons: ' + this.controller.get('ordered_buttons'));
     if(!app_state.get('edit_mode')) {
       if(app_state.get('speak_mode') && app_state.get('currentUser.preferences.require_speak_mode_pin') && app_state.get('currentUser.preferences.speak_mode_pin')) {
         modal.open('speak-mode-pin', {actual_pin: app_state.get('currentUser.preferences.speak_mode_pin'), action: 'edit'});
@@ -254,6 +259,8 @@ var editManager = Ember.Object.extend({
         Ember.set(button, key, options[key]);
       }
       this.check_button(id);
+      console.log("Changed button - new ordered_buttons: " + this.controller.get('ordered_buttons'));
+      this.fetch_suggestions(this.controller.get('model.name'), this.controller.get('ordered_buttons'));
     } else {
       console.log("no button found for: " + id);
     }
@@ -952,7 +959,56 @@ var editManager = Ember.Object.extend({
         reject({editor: 'no editor found'});
       }
     });
-  }
+  },
+  fetch_suggestions: function(title, ordered_buttons) {
+    alert("Fetch suggestions! :)");
+    console.log("FETCH_SUGGESTIONS FUNCTION!!!!!!!!!!!!!");
+    // Extract the words from buttons
+    var existing_words = [];
+    if (ordered_buttons) {
+      ordered_buttons.forEach(function(row) {
+        row.forEach(function(btn) {
+          if (btn && btn.label) {
+            existing_words.push(btn.label);
+          }
+        });
+      });
+    }
+    console.log("TITLE being passed: " + title);
+    console.log("WORDS being passed: " + existing_words);
+    
+    // Call DataMuse API
+    var datamuseUrl = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split().join(',') + '&max=15';
+    console.log('calling datamuse with url ' + datamuseUrl);
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var results = JSON.parse(this.responseText);
+        var suggested_words = [];
+        for (var i = 0; i < results.length; i++) {
+          suggested_words.push(results[i].word);
+        }
+        console.log(suggested_words);
+             
+      }
+    };
+    xmlhttp.open("GET", datamuseUrl, true);
+    xmlhttp.send();
+    
+/*Ember$.ajax({
+            url: datamuseUrl
+            // your other details...
+        }).then(function(resolve) {
+            self.set('name', resolve.doc.name);
+            // process the result...
+            var results = JSON.parse(name);
+            console.log(name);
+        });*/
+    
+  }/*,
+  create_button: function(word) {
+    var button = Button.create*/
 }).create({
   history: [],
   future: [],
