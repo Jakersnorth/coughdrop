@@ -25,6 +25,7 @@ export default Ember.Controller.extend({
     return title;
   }.property('model.name'),
   ordered_buttons: null,
+  suggested_buttons: null,
   processButtons: function() {
     this.update_button_symbol_class();
     boundClasses.add_rules(this.get('model.buttons'));
@@ -116,7 +117,7 @@ export default Ember.Controller.extend({
         }
       }, function() { });
     }
-  }.observes('app_state.currentBoardState.reload_token', 'ordered_buttons', 'app_state.speak_mode'),
+  }.observes('app_state.currentBoardState.reload_token', 'ordered_buttons', 'suggested_buttons', 'app_state.speak_mode'),
   update_current_board_state: function() {
     if(this.get('model.id') && app_state.get('currentBoardState.id') == this.get('model.id')) {
       app_state.setProperties({
@@ -468,7 +469,7 @@ export default Ember.Controller.extend({
     });
     app_state.set('board_virtual_dom.ordered_buttons', ob);
     app_state.align_button_list();
-  }.observes('model.id', 'extra_pad', 'inner_pad', 'base_text_height', 'text_style', 'text_position', 'ordered_buttons', 'border_style', 'height', 'width', 'app_state.edit_mode', 'nothing_visible', 'app_state.currentUser.preferences.stretch_buttons'),
+  }.observes('model.id', 'extra_pad', 'inner_pad', 'base_text_height', 'text_style', 'text_position', 'ordered_buttons', 'suggested_buttons', 'border_style', 'height', 'width', 'app_state.edit_mode', 'nothing_visible', 'app_state.currentUser.preferences.stretch_buttons'),
   long_description: function() {
     var desc = "";
     if(this.get('model.name') && this.get('model.name') != 'Unnamed Board') {
