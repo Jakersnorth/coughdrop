@@ -90,7 +90,7 @@
                 </div>
               {{/each}}
             </div>
-            {{ suggested-buttons id="menu"}}
+            {{ suggested-buttons id="menu" buttons=ordered_buttons}}
           {{else}}
             {{#if app_state.currentUser.preferences.device.canvas_render}}
               {{board-canvas id="board_canvas" redraw='redraw' tabindex='0'}}

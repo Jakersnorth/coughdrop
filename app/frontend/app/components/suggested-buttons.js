@@ -32,5 +32,10 @@ export default Ember.Component.extend(InboundActions, {
 	}),
 	unsubscribeToService: Ember.on('willDestroyElement', function() {
 		this.get('slideoutService').off('toggleSlideout', this, this.toggleSlideout);
-	})
+	}),
+	actions: {
+		addButton: function(button) {
+			console.log(button);
+		}
+	}
 });
