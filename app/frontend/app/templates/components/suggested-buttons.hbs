@@ -1,0 +1,15 @@
+<nav>
+<h1>Test</h1>
+	{{#if buttons}}
+		{{#each buttons as |row|}}
+			{{#each row as |button|}}
+				{{#unless button.empty}}
+					<span role=button class="add-button" aria-label="Add Button" onclick={{action "addButton" button}}>
+						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					</span>
+					{{button.label}}
+				{{/unless}}
+			{{/each}}
+		{{/each}}
+	{{/if}}
+</nav>

@@ -81,13 +81,20 @@
           {{board.fast_html.html}}
         {{else if ordered_buttons}}
           {{#if app_state.edit_mode}}
-            {{#each ordered_buttons as |row|}}
-              <div class="button_row">
-                {{#each row as |button|}}
-                  {{partial "button"}}
-                {{/each}}
-              </div>
-            {{/each}}
+            <div id="slideout-main-panel" style="overflow: visible; background-color: white;">
+              {{#each ordered_buttons as |row|}}
+                <div class="button_row">
+                  {{#each row as |button|}}
+                    {{partial "button"}}
+                  {{/each}}
+                </div>
+              {{/each}}
+            </div>
+            {{#if suggested_buttons}}
+              {{ suggested-buttons id="menu" buttons=suggested_buttons}}
+            {{else}}
+               <h1> No suggested buttons :( </h1>
+            {{/if}}
           {{else}}
             {{#if app_state.currentUser.preferences.device.canvas_render}}
               {{board-canvas id="board_canvas" redraw='redraw' tabindex='0'}}

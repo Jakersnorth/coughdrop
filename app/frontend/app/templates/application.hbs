@@ -156,6 +156,9 @@
           {{t "Copy Button to Stash" key="copy_button_to_stash"}}
         </button>
       {{else}}
+        <button class="btn btn-default toggle-slideout-button" {{action "toggleSuggestedButtons"}}>
+          <span class='wide'>{{t "&nbsp;&nbsp;Toggle Suggestions&nbsp;&nbsp;" key="reveal_sidebar"}}</span>
+        </button>
         <button class={{no_paint_mode_class}} {{action "noPaint"}}><span class='wide'>{{t "&nbsp;&nbsp;Edit&nbsp;&nbsp;" key="edit"}}</span><span class='skinny glyphicon glyphicon-hand-up'></span></button>
         <span class="dropdown" style="display: inline-block;">
           <button class={{paint_mode_class}} data-toggle="dropdown">
@@ -621,7 +624,7 @@
   </div>
 </header>
 <div id="content" class={{content_class}}>
-  {{ outlet }}
+    {{ outlet }}
 </div>
 {{#if app_state.sidebar_visible}}
   <div id="sidebar" class='noselect' style={{sidebar_style}} class="advanced_selection">

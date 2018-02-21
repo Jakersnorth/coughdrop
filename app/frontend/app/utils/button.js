@@ -212,6 +212,35 @@ var Button = Ember.Object.extend({
     res = res + "</div>";
     return new Ember.String.htmlSafe(res);
   }.property('refresh_token', 'positioning', 'computed_style', 'computed_class', 'label', 'action_class', 'action_image', 'action_alt', 'image_holder_style', 'local_image_url', 'image_style', 'local_sound_url', 'sound.url', 'hide_label'),
+  sidebar_html: function() {
+    var pos = this.get('positioning');
+    var res= "";
+    res = res + "<div style='position:absolute;left:" + pos.left + "px;top:" + pos.top + "px;width:60px;height:20%;'";
+    res = res + " class='" + this.get('computed_class') + "' data-id='" + this.get('id') + "' tabindex='0'>";
+    if(this.get('pending')) {
+      res = res + "<div class='pending'><img src='" + Ember.templateHelpers.path('images/spinner.gif') + "' /></div>";
+    }
+    res = res + "<div class='" + this.get('action_class') + "'>";
+    res = res + "<span class='action'>";
+    res = res + "<img src='" + this.get('action_image') + "' alt='" + this.get('action_alt') + "' />";
+    res = res + "</span>";
+    res = res + "</div>";
+
+    res = res + "<span style='" + this.get('image_holder_style') + "'>";
+    if(!app_state.get('currentUser.hide_symbols') && this.get('local_image_url')) {
+      res = res + "<img src=\"" + clean_url(this.get('local_image_url')) + "\" onerror='button_broken_image(this);' style='" + this.get('image_style') + "' class='symbol' />";
+    }
+    res = res + "</span>";
+    if(this.get('sound')) {
+      res = res + "<audio style='display: none;' preload='auto' src=\"" + clean_url(this.get('local_sound_url')) + "\" rel=\"" + clean_url(this.get('sound.url')) + "\"></audio>";
+    }
+    res = res + "<div class='" + app_state.get('button_symbol_class') + "'>";
+    res = res + "<span class='" + (this.get('hide_label') ? "button-label hide-label" : "button-label") + "'>" + clean_text(this.get('label')) + "</span>";
+    res = res + "</div>";
+
+    res = res + "</div>";
+    return new Ember.String.htmlSafe(res);
+  }.property('refresh_token', 'positioning', 'computed_style', 'computed_class', 'label', 'action_class', 'action_image', 'action_alt', 'image_holder_style', 'local_image_url', 'image_style', 'local_sound_url', 'sound.url', 'hide_label'),
   image_holder_style: function() {
     var pos = this.get('positioning');
     return new Ember.String.htmlSafe(Button.image_holder_style(pos));
@@ -253,6 +282,7 @@ var Button = Ember.Object.extend({
   },
   load_image: function() {
     var _this = this;
+    alert("loading image");
     if(!_this.image_id) { return Ember.RSVP.resolve(); }
     var image = CoughDrop.store.peekRecord('image', _this.image_id);
     if(image && (!image.get('isLoaded') || !image.get('best_url'))) { image = null; }
@@ -500,7 +530,7 @@ Button.action_styling = function(action, button) {
       action = 'talk';
     }
   } else if(action == 'integration' && button.integration && button.integration.action_type == 'webhook') {
-    action = 'webhook'
+    action = 'webhook';
   }
   var res = {};
   res.action_class = 'action_container ';
