@@ -282,7 +282,6 @@ var Button = Ember.Object.extend({
   },
   load_image: function() {
     var _this = this;
-    alert("loading image");
     if(!_this.image_id) { return Ember.RSVP.resolve(); }
     var image = CoughDrop.store.peekRecord('image', _this.image_id);
     if(image && (!image.get('isLoaded') || !image.get('best_url'))) { image = null; }
