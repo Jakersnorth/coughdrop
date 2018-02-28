@@ -7,6 +7,10 @@ module Converters::CoughDrop
     json = to_external(board, {})
     OBF::External.to_obf(json, dest_path, path_hash)
   end
+
+  def self.to_csv(board, dest_path, path_hash=nil)
+    json = to_external
+  end
   
   def self.to_external(board, opts)
     res = OBF::Utils.obf_shell
@@ -364,7 +368,7 @@ module Converters::CoughDrop
   def self.from_csv_text(csv_text, opts)
     order_flat = []
     labels = []
-    images = []
+    image_urls = []
     board = Converters::Utils.obf_shell
     grid = {}
     csv_text.split('\n').each do |category_csv|
@@ -372,6 +376,7 @@ module Converters::CoughDrop
       category_attrs.each do |attr|
         attr.strip!
       end
+      puts categorys_attrs
       if category_attrs[0].downcase == 'title'
         board['name'] = category_attrs[1]
       end
@@ -385,23 +390,29 @@ module Converters::CoughDrop
         labels = category_attrs[1..-1]
       end
       if category_attrs[0].downcase == 'images'
-        images = category_attrs[1..-1]
+        image_urls = category_attrs[1..-1]
       end
     end
     b = 1
     id = 1
+    images = []
     until id > labels.length or b > grid[rows]*grid[columns]
+       b += 1
        if labels[id-1].downcase == 'n/a'
           order_flat[id-1] = null
           next
        end
        order_flat = id
-       button = {'id':id,
-                 'label':labels[id-1]
+       button = {'id' => id,
+                 'label' => labels[id-1]
                 }
-       if images.length >= id and images[id-1].length > 0
-          button['url'] = images[id-1]
+       if image_urls.length >= id and image_urls[id-1].length > 0
+          button['image_id'] = id
        end
+       image = {'id' => id,
+                'url' => image_urls[id-1]
+               }
+       images << image
        buttons << button
        id += 1
     end
@@ -409,11 +420,13 @@ module Converters::CoughDrop
     grid[order] = (0..grid[rows]).map do |i|
                     order_flat[i*grid[columns],grid[columns]]
                   end
+    puts grid[order]
     board = Converters::Utils.obf_shell
     board['id'] = opts['id']
     board['name'] = title
     board['buttons'] = buttons
     board['grid'] = grid
+    board['images'] = images
     return self.from_external(board, opts)
   end
 end
