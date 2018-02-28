@@ -1,15 +1,18 @@
-<nav>
-<h1>Test</h1>
+
+<h1>Suggestions</h1>
+	<ul style="list-style-type:none">
 	{{#if buttons}}
 		{{#each buttons as |row|}}
 			{{#each row as |button|}}
 				{{#unless button.empty}}
+					<li>
 					<span role=button class="add-button" aria-label="Add Button" onclick={{action "addButton" button}}>
 						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 					</span>
-					{{button.label}}
+					{{button.sidebar_html}}
+					</li>
 				{{/unless}}
 			{{/each}}
 		{{/each}}
 	{{/if}}
-</nav>
+	</ul>
