@@ -58,7 +58,6 @@ export default Ember.Component.extend(InboundActions, {
 					sound_id: button.sound_id,
 					external_id: button.external_id
 				});
-			} else {
 				editManager.lucky_symbol(spot.id);
 			}
 		}
