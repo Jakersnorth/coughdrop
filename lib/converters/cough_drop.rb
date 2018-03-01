@@ -10,6 +10,17 @@ module Converters::CoughDrop
 
   def self.to_csv(board, dest_path, path_hash=nil)
     json = to_external
+    csv_string = "title, #{json['name']}\n"
+    csv_string << "rows, #{json['grid']['rows']}\ncolumns, #{json['grid']['columns']}\n"
+    csv_string << "labels"
+    json[buttons].each do |btn|
+      csv_string << ", #{btn['label']}"
+    end
+    csv_string << "\n images"
+    json[images].each do |img|
+      csv_string << ", #{img['label']}"
+    end
+    File.write(dest_path + json['name'] + ".csv", csv_string)
   end
   
   def self.to_external(board, opts)
