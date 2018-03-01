@@ -419,6 +419,7 @@ module Converters::CoughDrop
        buttons << button
        id += 1
     end
+    puts "doneish?"
     grid[order] = (0..grid[rows]).map do |i|
                     order_flat[i*grid[columns],grid[columns]]
                   end
