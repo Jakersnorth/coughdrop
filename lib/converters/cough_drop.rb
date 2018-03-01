@@ -366,17 +366,19 @@ module Converters::CoughDrop
   end
 
   def self.from_csv_text(csv_text, opts)
+    puts "hello"
     order_flat = []
     labels = []
     image_urls = []
     board = Converters::Utils.obf_shell
     grid = {}
+    puts "hi"
     csv_text.split('\n').each do |category_csv|
       category_attrs = category_csv.split(',')
       category_attrs.each do |attr|
         attr.strip!
       end
-      puts categorys_attrs
+      puts "here"
       if category_attrs[0].downcase == 'title'
         board['name'] = category_attrs[1]
       end
@@ -396,13 +398,14 @@ module Converters::CoughDrop
     b = 1
     id = 1
     images = []
+    puts "more"
     until id > labels.length or b > grid[rows]*grid[columns]
        b += 1
        if labels[id-1].downcase == 'n/a'
           order_flat[id-1] = null
           next
        end
-       order_flat = id
+       order_flat[id-1] = id
        button = {'id' => id,
                  'label' => labels[id-1]
                 }
@@ -416,11 +419,10 @@ module Converters::CoughDrop
        buttons << button
        id += 1
     end
-    num_buttons = order_flat.length
     grid[order] = (0..grid[rows]).map do |i|
                     order_flat[i*grid[columns],grid[columns]]
                   end
-    puts grid[order]
+    puts "done?"
     board = Converters::Utils.obf_shell
     board['id'] = opts['id']
     board['name'] = title
