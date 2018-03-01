@@ -961,6 +961,7 @@ var editManager = Ember.Object.extend({
     });
   },
   fetch_suggestions: function(title, ordered_buttons) {
+    var num_suggestions = 5;
     //alert("Fetch suggestions! :)");
     console.log("FETCH_SUGGESTIONS FUNCTION!!!!!!!!!!!!!");
     // Extract the words from buttons
@@ -978,14 +979,17 @@ var editManager = Ember.Object.extend({
     console.log("WORDS being passed: " + existing_words);
     
     // Call DataMuse API
-    var datamuseUrl = 'https://api.datamuse.com/words?rel_trg=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&max=15';
+    var datamuseUrl = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&max=15';
     console.log('calling datamuse with url ' + datamuseUrl);
     var xmlhttp = new XMLHttpRequest();
     var controller = this.controller;
-    var create_button = this.create_button;
+    var _this = this;
+    //var create_button = this.create_sidebar_button;
     xmlhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         var results = JSON.parse(this.responseText);
+        console.log("results");
+        console.log(results);
         var suggested_words = [];
         for (var i = 0; i < results.length; i++) {
           suggested_words.push(results[i].word);
@@ -993,10 +997,9 @@ var editManager = Ember.Object.extend({
         console.log(suggested_words);
         //var numRows = controller.get('current_grid').rows;
         //console.log('num rows: ' + numRows);
-        numSuggestions = 5;
-        suggested_words = suggested_words.slice(0, numSuggestions);
+        suggested_words = suggested_words.slice(0, num_suggestions);
         var buttons = suggested_words.map(function(word){
-          return [create_button(word)];
+          return [_this.create_sidebar_button(word)];
         });
         console.log('buttons suggested -- ' + buttons);
         controller.set('suggested_buttons', buttons); 
@@ -1005,26 +1008,78 @@ var editManager = Ember.Object.extend({
       }
     };
     xmlhttp.open("GET", datamuseUrl, true);
-    xmlhttp.send();
-    
-/*Ember$.ajax({
-            url: datamuseUrl
-            // your other details...
-        }).then(function(resolve) {
-            self.set('name', resolve.doc.name);
-            // process the result...
-            var results = JSON.parse(name);
-            console.log(name);
-        });*/
-    
+    xmlhttp.send();    
   },
-  create_button: function(word) {
-    var button = Button.create({
-      id: 1,
+  create_sidebar_button: function(word) {
+    var _this = this;
+    var sidebar_button = Button.create({
+      id: 9999, // Button will not be added to the board
       label: word,
       background_color: "#fff"
     });
-    return button;
+    console.log("this");
+    console.log(_this);
+    console.log("heyo");
+    var board_id = _this.controller.get('model.id');
+    console.log("CREATING BUTTON ON SIDEBAR!");
+
+    // Search for an image corresponding to the word
+    // (This is mostly copy-pasted from the "lucky_symbols" method)
+    if (sidebar_button && sidebar_button.label && !sidebar_button.image && !sidebar_button.local_image_url) {
+      sidebar_button.set('pending_image', true);
+      sidebar_button.set('pending', true);
+      if(sidebar_button && sidebar_button.label && !sidebar_button.image) {
+        sidebar_button.check_for_parts_of_speech();
+      }
+      contentGrabbers.pictureGrabber.picture_search(stashes.get('last_image_library'), sidebar_button.label, _this.controller.get('model.user_name'), true).then(function(data) {
+        var image = data[0];
+        console.log("grabbing image");
+        if(image && sidebar_button && sidebar_button.label && !sidebar_button.image) {
+          var license = {
+            type: image.license,
+            copyright_notice_url: image.license_url,
+            source_url: image.source_url,
+            author_name: image.author,
+            author_url: image.author_url,
+            uneditable: true
+          };
+          var preview = {
+            url: persistence.normalize_url(image.image_url),
+            content_type: image.content_type,
+            suggestion: sidebar_button.label,
+            protected: image.protected,
+            protected_source: image.protected_source,
+            finding_user_name: image.finding_user_name,
+            external_id: image.id,
+            license: license
+          };
+
+          var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
+
+          save.then(function(image) {
+            if (_this.controller.get('model.id') == board_id && sidebar_button && sidebar_button.label && !sidebar_button.image) {
+              sidebar_button.set('pending', false);
+              sidebar_button.set('pending_image', false);
+              emberSet(sidebar_button, 'image_id', image.id);
+              emberSet(sidebar_button, 'image', image);
+            }
+          }, function() {
+            sidebar_button.set('pending', false);
+            sidebar_button.set('pending_image', false);
+          });
+        } else if(sidebar_button) {
+          sidebar_button.set('pending', false);
+          sidebar_button.set('pending_image', false);
+        }
+      }, function() {
+        sidebar_button.set('pending', false);
+        sidebar_button.set('pending_image', false);
+        // nothing to do here, this can be a silent failure and it's ok
+      });
+    }
+    console.log("returning!!");
+    console.log(sidebar_button);
+    return sidebar_button;
   }
 }).create({
   history: [],
