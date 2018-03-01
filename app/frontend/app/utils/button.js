@@ -217,9 +217,9 @@ var Button = Ember.Object.extend({
     res = res + "<div style='width:90%;height:160px;margin-left:5%;margin-right:5%;'";
     res = res + " class='" + this.get('computed_class') + "' data-id='" + this.get('id') + "' tabindex='0'>";
 
-    res = res + "<span style='" + this.get('image_holder_style') + "'>";
+    res = res + "<span style='margin-top:5px;vertical-align:top;display:inline-block;width:70%;height:120px;line-height:120px'>";
     if(this.get('local_image_url')) {
-      res = res + "<img src=\"" + clean_url(this.get('local_image_url')) + "\" onerror='button_broken_image(this);' style='" + this.get('image_style') + "' class='symbol' />";
+      res = res + "<img src=\"" + clean_url(this.get('local_image_url')) + "\" onerror='button_broken_image(this);' style='width:100%;vertical-align:middle;max-height:120px;' class='symbol' />";
     }
     res = res + "</span>";
 
