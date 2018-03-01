@@ -137,7 +137,6 @@ module Converters::CoughDrop
   
   def self.from_external(json, opts)
     obj = OBF::Utils.parse_obf(json)
-
     raise "user required" unless opts['user']
     raise "missing id" unless obj['id']
     if obj['ext_coughdrop_settings'] && obj['ext_coughdrop_settings']['protected'] && obj['ext_coughdrop_settings']['key']
@@ -377,66 +376,64 @@ module Converters::CoughDrop
   end
 
   def self.from_csv_text(csv_text, opts)
-    puts "hello"
     order_flat = []
     labels = []
     image_urls = []
     board = Converters::Utils.obf_shell
-    grid = {}
-    puts "hi"
-    csv_text.split('\n').each do |category_csv|
+    grid = {'rows' => 0,
+            'columns' => 0,
+            'order' => []}
+    csv_text.split("\n").each do |category_csv|
       category_attrs = category_csv.split(',')
       category_attrs.each do |attr|
         attr.strip!
       end
-      puts "here"
       if category_attrs[0].downcase == 'title'
         board['name'] = category_attrs[1]
-      end
-      if category_attrs[0].downcase == 'rows'
+      elsif category_attrs[0].downcase == 'rows'
         grid['rows'] = category_attrs[1]
-      end
-      if category_attrs[0].downcase == 'columns'
+      elsif category_attrs[0].downcase == 'columns'
         grid['columns'] = category_attrs[1]
-      end
-      if category_attrs[0].downcase == 'labels'
+      elsif category_attrs[0].downcase == 'labels'
         labels = category_attrs[1..-1]
-      end
-      if category_attrs[0].downcase == 'images'
+      elsif category_attrs[0].downcase == 'images'
         image_urls = category_attrs[1..-1]
       end
     end
     b = 1
     id = 1
     images = []
-    puts "more"
-    until id > labels.length or b > grid[rows]*grid[columns]
-       b += 1
-       if labels[id-1].downcase == 'n/a'
-          order_flat[id-1] = null
+    buttons = []
+    until b > labels.length do
+       if (labels[b-1].downcase == 'n/a' || labels[b-1].downcase == "")
+          order_flat[b-1] = 'null'
+          b += 1
           next
        end
-       order_flat[id-1] = id
+       order_flat[b-1] = id
        button = {'id' => id,
-                 'label' => labels[id-1]
+                 'label' => labels[b-1],
                 }
-       if image_urls.length >= id and image_urls[id-1].length > 0
+       if (image_urls.length >= b && image_urls[b-1].length > 0)
           button['image_id'] = id
+          image = {'id' => id,
+                   'url' => image_urls[b-1]
+                  }
+          images << image
        end
-       image = {'id' => id,
-                'url' => image_urls[id-1]
-               }
-       images << image
        buttons << button
        id += 1
+       b += 1
     end
-    grid[order] = (0..grid[rows]).map do |i|
-                    order_flat[i*grid[columns],grid[columns]]
-                  end
-    puts "done?"
-    board = Converters::Utils.obf_shell
+    row = 0
+    rows = grid['rows'].to_i
+    columns = grid['columns'].to_i
+    until (row >= rows) do
+      order = order_flat[(row*columns), columns]
+      grid['order'] << order
+      row += 1
+    end
     board['id'] = opts['id']
-    board['name'] = title
     board['buttons'] = buttons
     board['grid'] = grid
     board['images'] = images
