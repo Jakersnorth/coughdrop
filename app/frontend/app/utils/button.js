@@ -214,7 +214,7 @@ var Button = Ember.Object.extend({
   }.property('refresh_token', 'positioning', 'computed_style', 'computed_class', 'label', 'action_class', 'action_image', 'action_alt', 'image_holder_style', 'local_image_url', 'image_style', 'local_sound_url', 'sound.url', 'hide_label'),
   sidebar_html: function() {
     var res= "";
-    res = res + "<div style='width:200px;height:160px;'";
+    res = res + "<div style='width:90%;height:160px;margin-left:5%;margin-right:5%;'";
     res = res + " class='" + this.get('computed_class') + "' data-id='" + this.get('id') + "' tabindex='0'>";
 
     res = res + "<span style='" + this.get('image_holder_style') + "'>";
