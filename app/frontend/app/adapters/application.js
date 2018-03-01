@@ -4,6 +4,7 @@ import persistence from '../utils/persistence';
 
 var res = DS.RESTAdapter.extend({
   namespace: 'api/v1',
+<<<<<<< HEAD
   headers: {
   	'Access-Control-Allow-Origin': '*'
   }

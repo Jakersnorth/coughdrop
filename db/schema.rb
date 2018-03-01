@@ -23,12 +23,12 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   end
 
   create_table "audit_events", force: :cascade do |t|
-    t.string   "user_key",   limit: 255
+    t.string   "user_key"
     t.text     "data"
     t.string   "summary",    limit: 4096
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "event_type", limit: 255
+    t.string   "event_type"
     t.string   "record_id"
     t.index ["event_type", "created_at"], name: "index_audit_events_on_event_type_and_created_at", using: :btree
     t.index ["event_type", "record_id"], name: "index_audit_events_on_event_type_and_record_id", using: :btree
@@ -60,8 +60,8 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   end
 
   create_table "boards", force: :cascade do |t|
-    t.string   "name",             limit: 255
-    t.string   "key",              limit: 255
+    t.string   "name"
+    t.string   "key"
     t.string   "search_string",    limit: 4096
     t.boolean  "public"
     t.text     "settings"
@@ -71,7 +71,7 @@ ActiveRecord::Schema.define(version: 20171128171610) do
     t.integer  "home_popularity"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "current_revision", limit: 255
+    t.string   "current_revision"
     t.boolean  "any_upstream"
     t.index ["home_popularity"], name: "index_boards_on_home_popularity", using: :btree
     t.index ["key"], name: "index_boards_on_key", unique: true, using: :btree
@@ -88,14 +88,14 @@ ActiveRecord::Schema.define(version: 20171128171610) do
     t.integer  "parent_button_image_id"
     t.integer  "user_id"
     t.boolean  "public"
-    t.string   "path",                   limit: 255
+    t.string   "path"
     t.string   "url",                    limit: 4096
     t.text     "data"
     t.text     "settings"
-    t.string   "file_hash",              limit: 255
+    t.string   "file_hash"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "nonce",                  limit: 255
+    t.string   "nonce"
     t.boolean  "removable"
     t.index ["file_hash"], name: "index_button_images_on_file_hash", using: :btree
     t.index ["removable"], name: "index_button_images_on_removable", using: :btree
@@ -107,14 +107,14 @@ ActiveRecord::Schema.define(version: 20171128171610) do
     t.integer  "remote_id"
     t.integer  "user_id"
     t.boolean  "public"
-    t.string   "path",       limit: 255
+    t.string   "path"
     t.string   "url",        limit: 4096
     t.text     "data"
     t.text     "settings"
-    t.string   "file_hash",  limit: 255
+    t.string   "file_hash"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "nonce",      limit: 255
+    t.string   "nonce"
     t.boolean  "removable"
     t.index ["file_hash"], name: "index_button_sounds_on_file_hash", using: :btree
     t.index ["removable"], name: "index_button_sounds_on_removable", using: :btree
@@ -126,9 +126,9 @@ ActiveRecord::Schema.define(version: 20171128171610) do
     t.text     "data"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "cluster_type", limit: 255
-    t.string   "cluster_hash", limit: 255
-    t.index ["cluster_type", "cluster_hash"], name: "index_cluster_locations_on_cluster_type_and_hash", unique: true, using: :btree
+    t.string   "cluster_type"
+    t.string   "cluster_hash"
+    t.index ["cluster_type", "cluster_hash"], name: "index_cluster_locations_on_cluster_type_and_cluster_hash", unique: true, using: :btree
   end
 
   create_table "contact_messages", force: :cascade do |t|
@@ -138,23 +138,23 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   end
 
   create_table "deleted_boards", force: :cascade do |t|
-    t.string   "key",        limit: 255
+    t.string   "key"
     t.text     "settings"
     t.integer  "board_id"
     t.integer  "user_id"
     t.boolean  "cleared"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.index ["board_id"], name: "index_deleted_boards_on_board_id", using: :btree
+    t.index ["board_id"], name: "index_deleted_boards_on_board_id", unique: true, using: :btree
     t.index ["created_at", "cleared"], name: "index_deleted_boards_on_created_at_and_cleared", using: :btree
     t.index ["key"], name: "index_deleted_boards_on_key", using: :btree
     t.index ["user_id"], name: "index_deleted_boards_on_user_id", using: :btree
   end
 
   create_table "developer_keys", force: :cascade do |t|
-    t.string   "key",          limit: 255
+    t.string   "key"
     t.string   "redirect_uri", limit: 4096
-    t.string   "name",         limit: 255
+    t.string   "name"
     t.string   "secret",       limit: 4096
     t.string   "icon_url",     limit: 4096
     t.datetime "created_at"
@@ -164,7 +164,7 @@ ActiveRecord::Schema.define(version: 20171128171610) do
 
   create_table "devices", force: :cascade do |t|
     t.integer  "user_id"
-    t.string   "device_key",          limit: 255
+    t.string   "device_key"
     t.text     "settings"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -176,10 +176,11 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   create_table "gift_purchases", force: :cascade do |t|
     t.text     "settings"
     t.boolean  "active"
-    t.string   "code",       limit: 255
+    t.string   "code"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.index ["active", "code"], name: "index_gift_purchases_on_active_and_code", unique: true, using: :btree
+    t.index ["active", "code"], name: "index_gift_purchases_on_active_and_code", using: :btree
+    t.index ["code"], name: "index_gift_purchases_on_code", unique: true, using: :btree
   end
 
   create_table "log_session_boards", force: :cascade do |t|
@@ -201,7 +202,7 @@ ActiveRecord::Schema.define(version: 20171128171610) do
     t.datetime "updated_at"
     t.integer  "ip_cluster_id"
     t.integer  "geo_cluster_id"
-    t.string   "log_type",                limit: 255
+    t.string   "log_type"
     t.boolean  "has_notes"
     t.datetime "last_cluster_attempt_at"
     t.integer  "goal_id"
@@ -226,9 +227,9 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   end
 
   create_table "old_keys", force: :cascade do |t|
-    t.string   "record_id",  limit: 255
-    t.string   "type",       limit: 255
-    t.string   "key",        limit: 255
+    t.string   "record_id"
+    t.string   "type"
+    t.string   "key"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.index ["type", "key"], name: "index_old_keys_on_type_and_key", using: :btree
@@ -243,15 +244,6 @@ ActiveRecord::Schema.define(version: 20171128171610) do
     t.index ["organization_id", "position"], name: "index_organization_units_on_organization_id_and_position", using: :btree
   end
 
-  create_table "organization_users", force: :cascade do |t|
-    t.integer  "user_id"
-    t.integer  "organization_id"
-    t.string   "user_type"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
-    t.index ["organization_id", "user_type"], name: "index_organization_users_on_organization_id_and_user_type", using: :btree
-  end
-
   create_table "organizations", force: :cascade do |t|
     t.text     "settings"
     t.boolean  "admin"
@@ -264,7 +256,7 @@ ActiveRecord::Schema.define(version: 20171128171610) do
 
   create_table "progresses", force: :cascade do |t|
     t.text     "settings"
-    t.string   "nonce",       limit: 255
+    t.string   "nonce"
     t.datetime "started_at"
     t.datetime "finished_at"
     t.datetime "created_at"
@@ -273,8 +265,8 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   end
 
   create_table "settings", force: :cascade do |t|
-    t.string   "key",        limit: 255
-    t.string   "value",      limit: 255
+    t.string   "key"
+    t.string   "value"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "data"
@@ -343,8 +335,8 @@ ActiveRecord::Schema.define(version: 20171128171610) do
 
   create_table "user_link_codes", force: :cascade do |t|
     t.integer  "user_id"
-    t.string   "user_global_id", limit: 255
-    t.string   "code",           limit: 255
+    t.string   "user_global_id"
+    t.string   "code"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.index ["code"], name: "index_user_link_codes_on_code", unique: true, using: :btree
@@ -374,7 +366,7 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string   "user_name",                limit: 255
+    t.string   "user_name"
     t.string   "email_hash",               limit: 4096
     t.text     "settings"
     t.datetime "created_at"
@@ -398,14 +390,14 @@ ActiveRecord::Schema.define(version: 20171128171610) do
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "nonce",      limit: 255
+    t.string   "nonce"
   end
 
   create_table "versions", force: :cascade do |t|
-    t.string   "item_type",  limit: 255, null: false
-    t.integer  "item_id",                null: false
-    t.string   "event",      limit: 255, null: false
-    t.string   "whodunnit",  limit: 255
+    t.string   "item_type",  null: false
+    t.integer  "item_id",    null: false
+    t.string   "event",      null: false
+    t.string   "whodunnit"
     t.text     "object"
     t.datetime "created_at"
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id", using: :btree
@@ -413,7 +405,7 @@ ActiveRecord::Schema.define(version: 20171128171610) do
 
   create_table "webhooks", force: :cascade do |t|
     t.integer  "user_id"
-    t.string   "record_code",         limit: 255
+    t.string   "record_code"
     t.text     "settings"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -434,8 +426,8 @@ ActiveRecord::Schema.define(version: 20171128171610) do
   end
 
   create_table "word_data", force: :cascade do |t|
-    t.string   "word",       limit: 255
-    t.string   "locale",     limit: 255
+    t.string   "word"
+    t.string   "locale"
     t.text     "data"
     t.datetime "created_at"
     t.datetime "updated_at"
