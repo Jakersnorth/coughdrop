@@ -6,7 +6,7 @@
 			{{#each row as |button|}}
 				{{#unless button.empty}}
 					<li>
-					<span role=button class="add-button" aria-label="Add Button" onclick={{action "addButton" button}}>
+					<span role=button style="position:relative;left:80%;top:30px;" class="add-button" aria-label="Add Button" onclick={{action "addButton" button}}>
 						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 					</span>
 					{{button.sidebar_html}}
