@@ -978,7 +978,7 @@ var editManager = Ember.Object.extend({
     console.log("WORDS being passed: " + existing_words);
     
     // Call DataMuse API
-    var datamuseUrl = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&max=15';
+    var datamuseUrl = 'https://api.datamuse.com/words?rel_trg=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&max=15';
     console.log('calling datamuse with url ' + datamuseUrl);
     var xmlhttp = new XMLHttpRequest();
     var controller = this.controller;
@@ -991,16 +991,17 @@ var editManager = Ember.Object.extend({
           suggested_words.push(results[i].word);
         }
         console.log(suggested_words);
-        var numRows = controller.get('current_grid').rows;
-        console.log('num rows: ' + numRows);
-        suggested_words = suggested_words.slice(0, numRows);
+        //var numRows = controller.get('current_grid').rows;
+        //console.log('num rows: ' + numRows);
+        numSuggestions = 5;
+        suggested_words = suggested_words.slice(0, numSuggestions);
         var buttons = suggested_words.map(function(word){
           return [create_button(word)];
         });
         console.log('buttons suggested -- ' + buttons);
         controller.set('suggested_buttons', buttons); 
-        console.log('what is inside sugg??? ' + controller.get('suggested_buttons')[0][0].label);
-        console.log('ordered buttons: ' + controller.get('ordered_buttons')[0][0].label);
+        //console.log('what is inside sugg??? ' + controller.get('suggested_buttons')[0][0].label);
+        //console.log('ordered buttons: ' + controller.get('ordered_buttons')[0][0].label);
       }
     };
     xmlhttp.open("GET", datamuseUrl, true);
