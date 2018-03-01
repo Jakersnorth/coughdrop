@@ -1053,10 +1053,12 @@ var editManager = Ember.Object.extend({
             external_id: image.id,
             license: license
           };
-
+          console.log("about to save");
+          sidebar_button.set('local_image_url', preview.url);
           var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
-
+          console.log("yoooo");
           save.then(function(image) {
+            console.log("saved! :)");
             if (_this.controller.get('model.id') == board_id && sidebar_button && sidebar_button.label && !sidebar_button.image) {
               sidebar_button.set('pending', false);
               sidebar_button.set('pending_image', false);
