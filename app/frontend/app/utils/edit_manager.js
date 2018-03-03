@@ -9,6 +9,7 @@ import persistence from './persistence';
 import progress_tracker from './progress_tracker';
 import word_suggestions from './word_suggestions';
 import i18n from './i18n';
+import {stemmer} from './PorterStemmer1980';
 
 var editManager = Ember.Object.extend({
   setup: function(board) {
@@ -979,21 +980,21 @@ var editManager = Ember.Object.extend({
     console.log("WORDS being passed: " + existing_words);
     
     // Call DataMuse API
-    const datamuse = require('datamuse');
-    //var datamuse_url = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&max=15';
-    var datamuse_url = 'words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&md=f&max=20';
+    //const datamuse = require('datamuse');
+    var datamuse_url = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&md=f&max=20';
+    //var datamuse_url = 'words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&md=f&max=20';
     console.log('calling datamuse with url ' + datamuse_url);
-    //var xmlhttp = new XMLHttpRequest();
-    //var controller = this.controller;
-    //var _this = this;
-    var stem = require('stem-porter');
+    var xmlhttp = new XMLHttpRequest();
+    var controller = this.controller;
+    var _this = this;
+    //var stem = require('stem-porter');
     //var create_button = this.create_sidebar_button;
-    //xmlhttp.onreadystatechange = function() {
-    //  if (this.readyState == 4 && this.status == 200) {
-    datamuse.request(datamuse_url)
-      .then((json) => {
-        //var results = JSON.parse(this.responseText);
-        var results = JSON.parse(json);
+    xmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+    //datamuse.request(datamuse_url)
+      //.then((json) => {
+        var results = JSON.parse(this.responseText);
+        //var results = JSON.parse(json);
         console.log("results");
         console.log(results);
         var suggested_words = [];
@@ -1004,30 +1005,37 @@ var editManager = Ember.Object.extend({
         // the other should not be suggested. (This isn't perfect though,
         // but if the creator actually wants multiple words with the same
         // stem, they can be inputted maually.
-        var stems = Set();
+        var stems = new Set();
         for (let existing_word of existing_words) {
           stems.add(stemmer(existing_word));
         }
         for (var i = 0; i < results.length; i++) {
           var stem = stemmer(results[i].word);
           if (!stems.has(stem)) {
-            suggested_words.push(results[i].word);
+            var frequency = results[i].tags.find(function(element) {
+              return element.startsWith("f:");
+            }).substring(2);
+            suggested_words.push([results[i].word, results[i].score * Math.log(frequency)]);
             stems.add(stem);
+            console.log("STEM " + stem);
           } else {
             console.log("Duplicate stem! " + stem);
           } 
-        }
-        console.log("Suggested words: " + suggested_words);
+        } 
+        suggested_words.sort(function(a,b) {
+          return b[1] - a[1];
+        });
         suggested_words = suggested_words.slice(0, num_suggestions);
-        var buttons = suggested_words.map(function(word){
-          return [_this.create_sidebar_button(word)];
+        console.log("Suggested words: " + suggested_words);
+        var buttons = suggested_words.map(function(result){
+          return [_this.create_sidebar_button(result[0])];
         });
         console.log('buttons suggested -- ' + buttons);
         controller.set('suggested_buttons', buttons); 
-      };
-    //};
-    //xmlhttp.open("GET", datamuseUrl, true);
-    //xmlhttp.send();    
+      }
+    };
+    xmlhttp.open("GET", datamuse_url, true);
+    xmlhttp.send();    
   },
   create_sidebar_button: function(word) {
     var _this = this;
