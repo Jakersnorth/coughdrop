@@ -9,18 +9,34 @@ module Converters::CoughDrop
   end
 
   def self.to_csv(board, dest_path, path_hash=nil)
-    json = to_external
-    csv_string = "title, #{json['name']}\n"
-    csv_string << "rows, #{json['grid']['rows']}\ncolumns, #{json['grid']['columns']}\n"
-    csv_string << "labels"
-    json[buttons].each do |btn|
-      csv_string << ", #{btn['label']}"
+    json = to_external(board, {})
+    csv_string = "title, " + json['name'] + "\n"
+    grid = json['grid']
+    csv_string += "rows, " + grid['rows'].to_s + "\ncolumns, "
+    csv_string += grid['columns'].to_s + "\n"
+    csv_string += "labels"
+    order_flat = []
+    grid['order'].each do |row|
+      row.each do |cell|
+        order_flat << cell
+      end
     end
-    csv_string << "\n images"
-    json[images].each do |img|
-      csv_string << ", #{img['label']}"
+    order_flat.each_with_index do |cell, idx|
+      if cell == nil || cell == 'null'
+        button = {'label' => 'n/a'}
+        image = {'url' => 'n/a'}
+        json['buttons'].insert(idx, button)
+        json['images'].insert(idx, image)
+      end
     end
-    File.write(dest_path + json['name'] + ".csv", csv_string)
+    json['buttons'].each do |btn|
+      csv_string += ", " + btn['label']
+    end
+    csv_string += "\n images"
+    json['images'].each do |img|
+      csv_string += ", " + img['url']
+    end
+    File.open(dest_path, 'w') {|f| f.write(csv_string) }
   end
   
   def self.to_external(board, opts)
@@ -143,7 +159,6 @@ module Converters::CoughDrop
       user_name = obj['ext_coughdrop_settings']['key'].split(/\//)[0]
       raise "can't import protected boards to a different user" unless user_name == opts['user'].user_name
     end
-
     hashes = {}
     hashes['images_hash_ids'] = obj['buttons'].map{|b| b && b['image_id'] }.compact
     hashes['sounds_hash_ids'] = obj['buttons'].map{|b| b && b['sound_id'] }.compact
@@ -371,7 +386,7 @@ module Converters::CoughDrop
   end
 
   def self.from_csv(csv_path, opts)
-    opts['id'] ||= csv_path.split('/').last
+    opts['id'] ||= csv_path.split('/').last.split('.').first
     self.from_csv_text(File.read(csv_path), opts)
   end
 
