@@ -10,12 +10,14 @@ module Converters::CoughDrop
 
   def self.to_csv(board, dest_path, path_hash=nil)
     json = to_external(board, {})
+    puts "1"
     csv_string = "title, " + json['name'] + "\n"
     grid = json['grid']
     csv_string += "rows, " + grid['rows'].to_s + "\ncolumns, "
     csv_string += grid['columns'].to_s + "\n"
     csv_string += "labels"
     order_flat = []
+    puts "2"
     grid['order'].each do |row|
       row.each do |cell|
         order_flat << cell
@@ -23,19 +25,32 @@ module Converters::CoughDrop
     end
     order_flat.each_with_index do |cell, idx|
       if cell == nil || cell == 'null'
-        button = {'label' => 'n/a'}
-        image = {'url' => 'n/a'}
+        button = {'label' => 'n/a',
+                  'imgurl' => 'n/a'}
         json['buttons'].insert(idx, button)
-        json['images'].insert(idx, image)
       end
     end
+    imgidx = 0
+    json['buttons'].each do |btn|
+      if btn['image_id']
+        newimg = json['images'][imgidx]
+        btn['imgurl'] = newimg['url']
+        imgidx += 1
+      else
+        btn['imgurl'] = 'n/a'
+      end
+    end
+    puts "3"
     json['buttons'].each do |btn|
       csv_string += ", " + btn['label']
     end
-    csv_string += "\n images"
-    json['images'].each do |img|
-      csv_string += ", " + img['url']
+    puts "4"
+    csv_string += "\nimages"
+    json['buttons'].each do |btn|
+      puts btn['imgurl']
+      csv_string += ", " + btn['imgurl']
     end
+    puts "done"
     File.open(dest_path, 'w') {|f| f.write(csv_string) }
   end
   
