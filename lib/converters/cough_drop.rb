@@ -13,8 +13,7 @@ module Converters::CoughDrop
     csv_string = "title, " + json['name'] + "\n"
     grid = json['grid']
     csv_string += "rows, " + grid['rows'].to_s + "\ncolumns, "
-    csv_string += grid['columns'].to_s + "\n"
-    csv_string += "labels"
+    csv_string += grid['columns'].to_s
     order_flat = []
     grid['order'].each do |row|
       row.each do |cell|
@@ -23,18 +22,38 @@ module Converters::CoughDrop
     end
     order_flat.each_with_index do |cell, idx|
       if cell == nil || cell == 'null'
-        button = {'label' => 'n/a'}
-        image = {'url' => 'n/a'}
+        button = {'label' => 'n/a',
+                  'imgurl' => 'n/a'}
         json['buttons'].insert(idx, button)
-        json['images'].insert(idx, image)
       end
     end
+    imgidx = 0
     json['buttons'].each do |btn|
-      csv_string += ", " + btn['label']
+      if btn['image_id']
+        newimg = json['images'][imgidx]
+        btn['imgurl'] = newimg['url']
+        imgidx += 1
+      else
+        btn['imgurl'] = 'n/a'
+      end
     end
-    csv_string += "\n images"
-    json['images'].each do |img|
-      csv_string += ", " + img['url']
+    row = 0
+    while row < grid['rows'] do
+      col = 0
+      csv_string += "\nlabels"
+      while col < grid['columns'] do
+        btn = json['buttons'][row*grid['columns']+col]
+        csv_string += ", " + btn['label']
+        col += 1
+      end
+      col = 0
+      csv_string += "\nimages"
+      while col < grid['columns'] do
+        btn = json['buttons'][row*grid['columns']+col]
+        csv_string += ", " + btn['imgurl']
+        col += 1
+      end
+      row += 1
     end
     File.open(dest_path, 'w') {|f| f.write(csv_string) }
   end
@@ -410,9 +429,9 @@ module Converters::CoughDrop
       elsif category_attrs[0].downcase == 'columns'
         grid['columns'] = category_attrs[1]
       elsif category_attrs[0].downcase == 'labels'
-        labels = category_attrs[1..-1]
+        (labels << category_attrs[1..-1]).flatten!
       elsif category_attrs[0].downcase == 'images'
-        image_urls = category_attrs[1..-1]
+        (image_urls << category_attrs[1..-1]).flatten!
       end
     end
     b = 1
@@ -430,11 +449,13 @@ module Converters::CoughDrop
                  'label' => labels[b-1],
                 }
        if (image_urls.length >= b && image_urls[b-1].length > 0)
-          button['image_id'] = id
-          image = {'id' => id,
-                   'url' => image_urls[b-1]
-                  }
-          images << image
+          if image_urls[b-1].downcase != 'n/a'
+             button['image_id'] = id
+             image = {'id' => id,
+                      'url' => image_urls[b-1]
+                     }
+             images << image
+          end
        end
        buttons << button
        id += 1
