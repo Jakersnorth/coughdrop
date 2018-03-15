@@ -131,9 +131,6 @@ export default Ember.Controller.extend({
   computeHeight: function() {
     var height = window.innerHeight;
     var width = window.innerWidth;
-    if(app_state.get('sidebar_pinned')) {
-      width = width - 100; // TODO: make sidebar size configurable, or have it match top bar
-    }
     this.set('window_inner_width', window.innerWidth);
     app_state.set('window_inner_width', window.innerWidth);
     var show_description = !app_state.get('edit_mode') && !app_state.get('speak_mode') && this.get('long_description');
@@ -202,9 +199,13 @@ export default Ember.Controller.extend({
       return;
     }
     last_redraw = (new Date()).getTime();
+    var currWidth = this.get('width');
+    if(app_state.get('slideout_toggled')) {
+      currWidth = currWidth - 256; // TODO: make sidebar size configurable, or have it match top bar
+    }
 
     var starting_height = Math.floor((this.get('height') / (grid.rows || 2)) * 100) / 100;
-    var starting_width = Math.floor((this.get('width') / (grid.columns || 2)) * 100) / 100;
+    var starting_width = Math.floor((currWidth / (grid.columns || 2)) * 100) / 100;
     var extra_pad = this.get('extra_pad');
     var inner_pad = this.get('inner_pad');
     var double_pad = inner_pad * 2;

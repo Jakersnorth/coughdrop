@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import InboundActions from '../../ember-component-inbound-actions/inbound-actions';
 import editManager from '../utils/edit_manager';
+import appState from '../utils/app_state';
 
 export default Ember.Component.extend(InboundActions, {
 	slideoutService: Ember.inject.service('slideout-service'),
@@ -36,6 +37,8 @@ export default Ember.Component.extend(InboundActions, {
 
 	toggleSlideout: function() {
 		this.get('slideout').toggle();
+		appState.set('slideout_toggled', !appState.get('slideout_toggled'));
+		editManager.controller.redraw_if_needed();
 	},
 
 	subscribeToService: Ember.on('init', function() {
