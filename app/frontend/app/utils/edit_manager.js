@@ -37,6 +37,7 @@ var editManager = Ember.Object.extend({
     this.stashedButtonToApply = null;
     this.clear_history();
     console.log("Title!!!!! " + this.controller.get('model.name'));
+    this.set('suggestion_id', 9000);
     this.fetch_suggestions(this.controller.get('model.name'), this.controller.get('ordered_buttons'));
   },
   set_drag_mode: function(enable) {
@@ -962,7 +963,7 @@ var editManager = Ember.Object.extend({
     });
   },
   fetch_suggestions: function(title, ordered_buttons) {
-    var num_suggestions = 5;
+    var num_suggestions = 20;
     //alert("Fetch suggestions! :)");
     console.log("FETCH_SUGGESTIONS FUNCTION!!!!!!!!!!!!!");
     // Extract the words from buttons
@@ -1015,7 +1016,7 @@ var editManager = Ember.Object.extend({
             var frequency = results[i].tags.find(function(element) {
               return element.startsWith("f:");
             }).substring(2);
-            suggested_words.push([results[i].word, results[i].score * Math.log(frequency)]);
+            suggested_words.push([results[i].word, results[i].score * Math.log10(frequency)]);
             stems.add(stem);
             console.log("STEM " + stem);
           } else {
@@ -1039,11 +1040,15 @@ var editManager = Ember.Object.extend({
   },
   create_sidebar_button: function(word) {
     var _this = this;
+    var suggestion_button_id = this.get('suggestion_id');
+    this.set('suggestion_id', suggestion_button_id + 1);
+    console.log("ID " + suggestion_button_id);
     var sidebar_button = Button.create({
-      id: 9999, // Fake ID - The button will not be added to the board
+      id: suggestion_button_id,
       label: word,
       background_color: "#fff"
     });
+    
     var board_id = _this.controller.get('model.id');
 
     // Search for an image corresponding to the word
@@ -1078,7 +1083,9 @@ var editManager = Ember.Object.extend({
           };
           console.log("about to save");
           sidebar_button.set('local_image_url', preview.url);
-          var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
+          sidebar_button.set('pending', false);
+          sidebar_button.set('pending_image', true);
+          /*var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
           console.log("yoooo");
           save.then(function(image) {
             console.log("saved! :)");
@@ -1091,7 +1098,7 @@ var editManager = Ember.Object.extend({
           }, function() {
             sidebar_button.set('pending', false);
             sidebar_button.set('pending_image', false);
-          });
+          });*/
         } else if(sidebar_button) {
           sidebar_button.set('pending', false);
           sidebar_button.set('pending_image', false);
