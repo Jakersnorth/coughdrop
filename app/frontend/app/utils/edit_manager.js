@@ -9,6 +9,7 @@ import persistence from './persistence';
 import progress_tracker from './progress_tracker';
 import word_suggestions from './word_suggestions';
 import i18n from './i18n';
+import {stemmer} from './PorterStemmer1980';
 
 var editManager = Ember.Object.extend({
   setup: function(board) {
@@ -36,6 +37,7 @@ var editManager = Ember.Object.extend({
     this.stashedButtonToApply = null;
     this.clear_history();
     console.log("Title!!!!! " + this.controller.get('model.name'));
+    this.set('suggestion_id', 9000);
     this.fetch_suggestions(this.controller.get('model.name'), this.controller.get('ordered_buttons'));
   },
   set_drag_mode: function(enable) {
@@ -961,7 +963,7 @@ var editManager = Ember.Object.extend({
     });
   },
   fetch_suggestions: function(title, ordered_buttons) {
-    var num_suggestions = 5;
+    var num_suggestions = 20;
     //alert("Fetch suggestions! :)");
     console.log("FETCH_SUGGESTIONS FUNCTION!!!!!!!!!!!!!");
     // Extract the words from buttons
@@ -979,49 +981,75 @@ var editManager = Ember.Object.extend({
     console.log("WORDS being passed: " + existing_words);
     
     // Call DataMuse API
-    var datamuseUrl = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&max=15';
-    console.log('calling datamuse with url ' + datamuseUrl);
+    //const datamuse = require('datamuse');
+    var datamuse_url = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&md=f&max=20';
+    //var datamuse_url = 'words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&md=f&max=20';
+    console.log('calling datamuse with url ' + datamuse_url);
     var xmlhttp = new XMLHttpRequest();
     var controller = this.controller;
     var _this = this;
+    //var stem = require('stem-porter');
     //var create_button = this.create_sidebar_button;
     xmlhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
+    //datamuse.request(datamuse_url)
+      //.then((json) => {
         var results = JSON.parse(this.responseText);
+        //var results = JSON.parse(json);
         console.log("results");
         console.log(results);
         var suggested_words = [];
-        for (var i = 0; i < results.length; i++) {
-          suggested_words.push(results[i].word);
+        
+        // Keep track of a set of "stems" so that we avoid suggesting
+        // duplicate words. For example, "walk", "walks", and "walking"
+        // share a common stem ("walk"), so if one is one the board,
+        // the other should not be suggested. (This isn't perfect though,
+        // but if the creator actually wants multiple words with the same
+        // stem, they can be inputted maually.
+        var stems = new Set();
+        for (let existing_word of existing_words) {
+          stems.add(stemmer(existing_word));
         }
-        console.log(suggested_words);
-        //var numRows = controller.get('current_grid').rows;
-        //console.log('num rows: ' + numRows);
+        for (var i = 0; i < results.length; i++) {
+          var stem = stemmer(results[i].word);
+          if (!stems.has(stem)) {
+            var frequency = results[i].tags.find(function(element) {
+              return element.startsWith("f:");
+            }).substring(2);
+            suggested_words.push([results[i].word, results[i].score * Math.log10(frequency)]);
+            stems.add(stem);
+            console.log("STEM " + stem);
+          } else {
+            console.log("Duplicate stem! " + stem);
+          } 
+        } 
+        suggested_words.sort(function(a,b) {
+          return b[1] - a[1];
+        });
         suggested_words = suggested_words.slice(0, num_suggestions);
-        var buttons = suggested_words.map(function(word){
-          return [_this.create_sidebar_button(word)];
+        console.log("Suggested words: " + suggested_words);
+        var buttons = suggested_words.map(function(result){
+          return [_this.create_sidebar_button(result[0])];
         });
         console.log('buttons suggested -- ' + buttons);
         controller.set('suggested_buttons', buttons); 
-        //console.log('what is inside sugg??? ' + controller.get('suggested_buttons')[0][0].label);
-        //console.log('ordered buttons: ' + controller.get('ordered_buttons')[0][0].label);
       }
     };
-    xmlhttp.open("GET", datamuseUrl, true);
+    xmlhttp.open("GET", datamuse_url, true);
     xmlhttp.send();    
   },
   create_sidebar_button: function(word) {
     var _this = this;
+    var suggestion_button_id = this.get('suggestion_id');
+    this.set('suggestion_id', suggestion_button_id + 1);
+    console.log("ID " + suggestion_button_id);
     var sidebar_button = Button.create({
-      id: 9999, // Button will not be added to the board
+      id: suggestion_button_id,
       label: word,
       background_color: "#fff"
     });
-    console.log("this");
-    console.log(_this);
-    console.log("heyo");
+    
     var board_id = _this.controller.get('model.id');
-    console.log("CREATING BUTTON ON SIDEBAR!");
 
     // Search for an image corresponding to the word
     // (This is mostly copy-pasted from the "lucky_symbols" method)
@@ -1055,7 +1083,9 @@ var editManager = Ember.Object.extend({
           };
           console.log("about to save");
           sidebar_button.set('local_image_url', preview.url);
-          var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
+          sidebar_button.set('pending', false);
+          sidebar_button.set('pending_image', true);
+          /*var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
           console.log("yoooo");
           save.then(function(image) {
             console.log("saved! :)");
@@ -1068,7 +1098,7 @@ var editManager = Ember.Object.extend({
           }, function() {
             sidebar_button.set('pending', false);
             sidebar_button.set('pending_image', false);
-          });
+          });*/
         } else if(sidebar_button) {
           sidebar_button.set('pending', false);
           sidebar_button.set('pending_image', false);
