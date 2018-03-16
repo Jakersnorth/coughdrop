@@ -964,8 +964,8 @@ var editManager = Ember.Object.extend({
   },
   fetch_suggestions: function(title, ordered_buttons) {
     var num_suggestions = 20;
-    //alert("Fetch suggestions! :)");
-    console.log("FETCH_SUGGESTIONS FUNCTION!!!!!!!!!!!!!");
+    console.log("fetch_suggestions function");
+
     // Extract the words from buttons
     var existing_words = [];
     if (ordered_buttons) {
@@ -981,31 +981,25 @@ var editManager = Ember.Object.extend({
     console.log("WORDS being passed: " + existing_words);
     
     // Call DataMuse API
-    //const datamuse = require('datamuse');
     var datamuse_url = 'https://api.datamuse.com/words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&md=f&max=20';
-    //var datamuse_url = 'words?ml=' + existing_words.join(',') + '&topics=' + title.split(' ').join(',') + '&md=f&max=20';
     console.log('calling datamuse with url ' + datamuse_url);
     var xmlhttp = new XMLHttpRequest();
     var controller = this.controller;
     var _this = this;
-    //var stem = require('stem-porter');
-    //var create_button = this.create_sidebar_button;
     xmlhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-    //datamuse.request(datamuse_url)
-      //.then((json) => {
         var results = JSON.parse(this.responseText);
-        //var results = JSON.parse(json);
         console.log("results");
         console.log(results);
         var suggested_words = [];
         
         // Keep track of a set of "stems" so that we avoid suggesting
         // duplicate words. For example, "walk", "walks", and "walking"
-        // share a common stem ("walk"), so if one is one the board,
-        // the other should not be suggested. (This isn't perfect though,
-        // but if the creator actually wants multiple words with the same
-        // stem, they can be inputted maually.
+        // share a common stem ("walk"), so if one is on the board,
+        // the other should not be suggested. (This is questionable -
+        // many CoughDrop users do want to create words with the same stem,
+        // but in those cases the creator problably wants the conjugations
+        // organized in some way, which can be done manually.)
         var stems = new Set();
         for (let existing_word of existing_words) {
           stems.add(stemmer(existing_word));
@@ -1085,7 +1079,8 @@ var editManager = Ember.Object.extend({
           sidebar_button.set('local_image_url', preview.url);
           sidebar_button.set('pending', false);
           sidebar_button.set('pending_image', true);
-          /*var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
+          /*Note: we do not actually need to save the sidebar buttons
+          var save = contentGrabbers.pictureGrabber.save_image_preview(preview);
           console.log("yoooo");
           save.then(function(image) {
             console.log("saved! :)");
