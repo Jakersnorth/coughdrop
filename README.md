@@ -1,3 +1,10 @@
+## Additions to CoughDrop's Board Creation Tools
+In this repository, we have implemented a sidebar which automatically suggests buttons to add to speech boards, as well as an option to upload and download boards to .csv files.
+
+For full installation instructions, see [this instructable](https://www.instructables.com/preview/EWI25Z2JEOIR230/). We also have a [user guide](https://docs.google.com/document/d/1N1omtgXOjGB76c9heiG0UbkUcNZucs7-t5pczxkI0bI/edit) detailing how to use our modified features. 
+
+Below is an explanation of what CoughDrop is.
+
 ## CoughDrop - Every Voice Should Be Heard
 
 CoughDrop is an open, web-based AAC (Augmentative and Alternative Communication) app. Basically
