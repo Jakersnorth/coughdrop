@@ -32,6 +32,7 @@ var app_state = Ember.Object.extend({
     });
     this.set('button_list', []);
     this.set('stashes', stashes);
+    this.set('slideout_toggled', false);
     this.set('geolocation', geolocation);
     this.set('installed_app', capabilities.installed_app);
     this.set('no_linky', capabilities.installed_app && capabilities.system == 'iOS');
